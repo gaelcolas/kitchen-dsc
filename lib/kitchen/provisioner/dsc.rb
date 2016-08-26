@@ -218,9 +218,8 @@ module Kitchen
 
       def list_files(path)
         base_directory_content = Dir.glob(File.join(path, "*"))
-        nested_directory_content = Dir.glob(File.join(path, "*/**/*"))
+        nested_directory_content = Dir.glob(File.join(path, "*/**{,/*/**}/*"))
         all_directory_content = [base_directory_content, nested_directory_content].flatten
-
         ignore_files = ["Gemfile", "Gemfile.lock", "README.md", "LICENSE.txt"]
         all_directory_content.reject do |f|
           debug("Enumerating #{f}")
@@ -234,6 +233,19 @@ module Kitchen
 
       def prepare_resource_style_directory
         sandbox_base_module_path = File.join(sandbox_path, "modules/#{module_name}")
+        module_path = File.join(config[:kitchen_root], config[:modules_path])
+        sandbox_module_path = File.join(sandbox_path, 'modules')
+
+        if Dir.exist?(module_path)
+          list_files(module_path).each do |src|
+            dest = File.join(sandbox_module_path, src.sub("#{module_path}/", ""))
+            FileUtils.mkdir_p(File.dirname(dest))
+            debug("Moving #{src} to #{dest}")
+            FileUtils.cp_r(src, dest)
+          end
+        else
+          debug("The modules path #{module_path} was not found. Not moving to #{sandbox_module_path}.")
+        end
 
         base = config[:kitchen_root]
         list_files(base).each do |src|
