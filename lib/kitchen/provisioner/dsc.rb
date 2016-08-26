@@ -220,6 +220,7 @@ module Kitchen
         base_directory_content = Dir.glob(File.join(path, "*"))
         nested_directory_content = Dir.glob(File.join(path, "*/**{,/*/**}/*"))
         all_directory_content = [base_directory_content, nested_directory_content].flatten
+        
         ignore_files = ["Gemfile", "Gemfile.lock", "README.md", "LICENSE.txt"]
         all_directory_content.reject do |f|
           debug("Enumerating #{f}")
